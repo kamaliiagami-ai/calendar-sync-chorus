@@ -1,8 +1,10 @@
 import { WorkflowCanvas } from "@/components/WorkflowCanvas";
 import { ConfigPanel } from "@/components/ConfigPanel";
+import { SetupGuide } from "@/components/SetupGuide";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Download, GitBranch } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowRight, Download, GitBranch, FileText } from "lucide-react";
 
 const Index = () => {
   return (
@@ -77,9 +79,26 @@ const Index = () => {
             </div>
           </div>
           
-          {/* Configuration Panel */}
+          {/* Right Panel */}
           <div className="lg:col-span-1">
-            <ConfigPanel />
+            <Tabs defaultValue="config" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="config" className="text-xs">
+                  Configure
+                </TabsTrigger>
+                <TabsTrigger value="guide" className="text-xs">
+                  Client Guide
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="config">
+                <ConfigPanel />
+              </TabsContent>
+              
+              <TabsContent value="guide">
+                <SetupGuide />
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </main>
