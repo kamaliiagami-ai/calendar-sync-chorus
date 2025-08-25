@@ -5,13 +5,50 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Calendar, Zap } from "lucide-react";
+import { Settings, Calendar, Zap, Download, Copy, Eye } from "lucide-react";
+import { generateN8nWorkflow, downloadWorkflow, copyToClipboard } from "@/lib/n8nWorkflow";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ConfigPanelProps {
   className?: string;
 }
 
 export const ConfigPanel = ({ className }: ConfigPanelProps) => {
+  const { toast } = useToast();
+  const [showPreview, setShowPreview] = useState(false);
+
+  const handleDownloadWorkflow = () => {
+    const workflow = generateN8nWorkflow();
+    downloadWorkflow(workflow);
+    toast({
+      title: "Workflow Downloaded",
+      description: "The n8n workflow file has been downloaded successfully.",
+    });
+  };
+
+  const handleCopyWorkflow = async () => {
+    const workflow = generateN8nWorkflow();
+    const success = await copyToClipboard(JSON.stringify(workflow, null, 2));
+    
+    if (success) {
+      toast({
+        title: "Workflow Copied",
+        description: "The workflow JSON has been copied to your clipboard.",
+      });
+    } else {
+      toast({
+        title: "Copy Failed",
+        description: "Failed to copy workflow to clipboard.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePreviewWorkflow = () => {
+    setShowPreview(!showPreview);
+  };
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -152,18 +189,41 @@ export const ConfigPanel = ({ className }: ConfigPanelProps) => {
               </p>
               
               <div className="space-y-3">
-                <Button className="w-full bg-gradient-primary hover:opacity-90">
+                <Button 
+                  className="w-full bg-gradient-primary hover:opacity-90"
+                  onClick={handleDownloadWorkflow}
+                >
+                  <Download className="w-4 h-4 mr-2" />
                   Download n8n Workflow
                 </Button>
                 
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={handleCopyWorkflow}
+                >
+                  <Copy className="w-4 h-4 mr-2" />
                   Copy Workflow JSON
                 </Button>
                 
-                <Button variant="ghost" className="w-full">
-                  Preview Workflow Code
+                <Button 
+                  variant="ghost" 
+                  className="w-full"
+                  onClick={handlePreviewWorkflow}
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  {showPreview ? 'Hide' : 'Preview'} Workflow Code
                 </Button>
               </div>
+              
+              {showPreview && (
+                <div className="mt-4 p-4 bg-background/50 rounded-lg border">
+                  <h4 className="text-sm font-medium mb-2">Workflow Preview</h4>
+                  <pre className="text-xs text-muted-foreground overflow-auto max-h-64">
+                    {JSON.stringify(generateN8nWorkflow(), null, 2)}
+                  </pre>
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
